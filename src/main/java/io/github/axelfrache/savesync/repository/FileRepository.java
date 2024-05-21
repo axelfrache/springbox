@@ -1,6 +1,7 @@
 package io.github.axelfrache.savesync.repository;
 
 import io.github.axelfrache.savesync.model.File;
+import io.github.axelfrache.savesync.model.Folder;
 import io.github.axelfrache.savesync.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -8,4 +9,6 @@ import java.util.List;
 
 public interface FileRepository extends JpaRepository<File, Long> {
     List<File> findByUser(User user);
+    List<File> findByFolderAndUser(Folder folder, User user);
+    List<File> findByUserAndFolderIsNull(User user);
 }

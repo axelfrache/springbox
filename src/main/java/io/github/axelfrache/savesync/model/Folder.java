@@ -4,24 +4,28 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
+import java.util.List;
 
 @Entity
 @Getter
 @Setter
-public class File {
+public class Folder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private String path;
-    private Date uploadDate;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "folder_id")
-    private Folder folder;
+    @JoinColumn(name = "parent_folder_id")
+    private Folder parentFolder;
+
+    @OneToMany(mappedBy = "parentFolder")
+    private List<Folder> subfolders;
+
+    @OneToMany(mappedBy = "folder")
+    private List<File> files;
 }
