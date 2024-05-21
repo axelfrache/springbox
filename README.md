@@ -43,6 +43,6 @@ The application uses an H2 in-memory database by default. For production use, yo
 
 ### Usage
 
-1. **Register** a new user at `http://localhost:8080/springcloud/register`
-2. **Login** with your credentials at `http://localhost:8080/springcloud/login`
-3. **Upload and manage your files** at `http://localhost:8080/springcloud/files`
+1. **Register** a new user at `http://localhost:8080/savesync/register`
+2. **Login** with your credentials at `http://localhost:8080/savesync/login`
+3. **Upload and manage your files** at `http://localhost:8080/savesync/files`
