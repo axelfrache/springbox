@@ -1,6 +1,6 @@
-# SaveSync
+# SpringBox
 
-SaveSync is a Spring-based application designed for secure and efficient file synchronization and backup. This project aims to provide a user-friendly interface for managing personal cloud storage solutions, leveraging the power of Spring Boot and modern web technologies.
+SpringBox is a Spring-based application designed for secure and efficient file synchronization and backup. This project aims to provide a user-friendly interface for managing personal cloud storage solutions, leveraging the power of Spring Boot and modern web technologies.
 
 ## Features
 
@@ -17,8 +17,8 @@ SaveSync is a Spring-based application designed for secure and efficient file sy
 1. Clone the repository
 
     ```sh
-    git clone https://github.com/axelfrache/SaveSync.git
-    cd SaveSync
+    git clone https://github.com/axelfrache/SpringBox.git
+    cd SpringBox
     ```
 
 2. Build the project
@@ -43,6 +43,6 @@ The application uses an H2 in-memory database by default. For production use, yo
 
 ### Usage
 
-1. **Register** a new user at `http://localhost:8080/savesync/register`
-2. **Login** with your credentials at `http://localhost:8080/savesync/login`
-3. **Upload and manage your files** at `http://localhost:8080/savesync/files`
+1. **Register** a new user at `http://localhost:8080/springbox/register`
+2. **Login** with your credentials at `http://localhost:8080/springbox/login`
+3. **Upload and manage your files** at `http://localhost:8080/springbox/files`

@@ -1,4 +1,4 @@
-package io.github.axelfrache.savesync.model;
+package io.github.axelfrache.springbox.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -9,7 +9,6 @@ import java.util.Date;
 @Entity
 @Getter
 @Setter
-@Table(name = "files")
 public class File {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,4 +20,8 @@ public class File {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "folder_id")
+    private Folder folder;
 }

@@ -1,6 +1,6 @@
-package io.github.axelfrache.savesync.repository;
+package io.github.axelfrache.springbox.repository;
 
-import io.github.axelfrache.savesync.model.User;
+import io.github.axelfrache.springbox.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
