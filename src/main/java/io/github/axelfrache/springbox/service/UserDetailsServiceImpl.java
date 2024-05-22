@@ -1,7 +1,7 @@
-package io.github.axelfrache.savesync.service;
+package io.github.axelfrache.springbox.service;
 
-import io.github.axelfrache.savesync.model.User;
-import io.github.axelfrache.savesync.repository.UserRepository;
+import io.github.axelfrache.springbox.model.User;
+import io.github.axelfrache.springbox.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

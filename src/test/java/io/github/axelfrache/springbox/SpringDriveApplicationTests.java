@@ -1,4 +1,4 @@
-package io.github.axelfrache.savesync;
+package io.github.axelfrache.springbox;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

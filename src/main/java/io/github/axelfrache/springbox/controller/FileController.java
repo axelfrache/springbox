@@ -1,11 +1,11 @@
-package io.github.axelfrache.savesync.controller;
+package io.github.axelfrache.springbox.controller;
 
-import io.github.axelfrache.savesync.model.File;
-import io.github.axelfrache.savesync.model.Folder;
-import io.github.axelfrache.savesync.model.User;
-import io.github.axelfrache.savesync.repository.FileRepository;
-import io.github.axelfrache.savesync.repository.FolderRepository;
-import io.github.axelfrache.savesync.repository.UserRepository;
+import io.github.axelfrache.springbox.model.File;
+import io.github.axelfrache.springbox.model.Folder;
+import io.github.axelfrache.springbox.model.User;
+import io.github.axelfrache.springbox.repository.FileRepository;
+import io.github.axelfrache.springbox.repository.FolderRepository;
+import io.github.axelfrache.springbox.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -32,12 +32,13 @@ public class FileController {
     @Autowired
     private UserRepository userRepository;
 
-    @GetMapping("/savesync/files")
+    @GetMapping("/springbox/files")
     public String listFiles(@RequestParam(required = false) Long folderId, Model model, @AuthenticationPrincipal UserDetails userDetails) {
         Optional<User> optionalUser = userRepository.findByUsername(userDetails.getUsername());
-        if (!optionalUser.isPresent()) {
+        if (optionalUser.isEmpty()) {
             return "error";
         }
+
         User user = optionalUser.get();
         Folder currentFolder = null;
         List<File> files;
@@ -55,13 +56,14 @@ public class FileController {
         model.addAttribute("files", files);
         model.addAttribute("folders", folders);
         model.addAttribute("currentFolder", currentFolder);
+        model.addAttribute("username", userDetails.getUsername());
         return "files";
     }
 
-    @PostMapping("/savesync/upload")
+    @PostMapping("/springbox/upload")
     public String uploadFile(@RequestParam("file") MultipartFile file, @RequestParam(required = false) Long folderId, @AuthenticationPrincipal UserDetails userDetails) throws IOException {
         Optional<User> optionalUser = userRepository.findByUsername(userDetails.getUsername());
-        if (!optionalUser.isPresent()) {
+        if (optionalUser.isEmpty()) {
             return "error";
         }
         User user = optionalUser.get();
@@ -81,13 +83,13 @@ public class FileController {
         dbFile.setUser(user);
         dbFile.setFolder(folder);
         fileRepository.save(dbFile);
-        return "redirect:/savesync/files?folderId=" + (folder != null ? folder.getId() : "");
+        return STR."redirect:/springbox/files?folderId=\{folder != null ? folder.getId() : ""}";
     }
 
-    @PostMapping("/savesync/folder")
+    @PostMapping("/springbox/folder")
     public String createFolder(@RequestParam("name") String name, @RequestParam(required = false) Long parentFolderId, @AuthenticationPrincipal UserDetails userDetails) {
         Optional<User> optionalUser = userRepository.findByUsername(userDetails.getUsername());
-        if (!optionalUser.isPresent()) {
+        if (optionalUser.isEmpty()) {
             return "error";
         }
         User user = optionalUser.get();
@@ -100,18 +102,30 @@ public class FileController {
         folder.setUser(user);
         folder.setParentFolder(parentFolder);
         folderRepository.save(folder);
-        return "redirect:/savesync/files?folderId=" + (parentFolder != null ? parentFolder.getId() : "");
+        return STR."redirect:/springbox/files?folderId=\{parentFolder != null ? parentFolder.getId() : ""}";
     }
 
-    @PostMapping("/savesync/folder/delete")
+    @PostMapping("/springbox/folder/delete")
     public String deleteFolder(@RequestParam("id") Long id) {
-        folderRepository.deleteById(id);
-        return "redirect:/savesync/files";
+        deleteFolderAndContents(id);
+        return "redirect:/springbox/files";
     }
 
-    @PostMapping("/savesync/file/delete")
+    @PostMapping("/springbox/file/delete")
     public String deleteFile(@RequestParam("id") Long id) {
         fileRepository.deleteById(id);
-        return "redirect:/savesync/files";
+        return "redirect:/springbox/files";
+    }
+
+    private void deleteFolderAndContents(Long folderId) {
+        List<Folder> subFolders = folderRepository.findByParentFolder(folderRepository.findById(folderId).orElse(null));
+        for (Folder subFolder : subFolders) {
+            deleteFolderAndContents(subFolder.getId());
+        }
+        List<File> files = fileRepository.findByFolderAndUser(folderRepository.findById(folderId).orElse(null), userRepository.findById(folderRepository.findById(folderId).orElse(null).getUser().getId()).orElse(null));
+        for (File file : files) {
+            fileRepository.deleteById(file.getId());
+        }
+        folderRepository.deleteById(folderId);
     }
 }

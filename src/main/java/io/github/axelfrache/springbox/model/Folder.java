@@ -1,4 +1,4 @@
-package io.github.axelfrache.savesync.model;
+package io.github.axelfrache.springbox.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;

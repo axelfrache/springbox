@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>io.github.axelfrache</groupId>
-    <artifactId>SaveSync</artifactId>
+    <artifactId>SpringBox</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>SpringDrive</name>
-    <description>SpringDrive</description>
+    <name>SpringBox</name>
+    <description>SpringBox</description>
     <properties>
         <java.version>22</java.version>
     </properties>
@@ -37,7 +37,12 @@
             <groupId>org.thymeleaf.extras</groupId>
             <artifactId>thymeleaf-extras-springsecurity6</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>

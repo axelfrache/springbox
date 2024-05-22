@@ -1,6 +1,6 @@
-package io.github.axelfrache.savesync.config;
+package io.github.axelfrache.springbox.config;
 
-import io.github.axelfrache.savesync.service.UserDetailsServiceImpl;
+import io.github.axelfrache.springbox.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,18 +29,21 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/savesync","/savesync/register", "/savesync/login", "/h2-console/**").permitAll()
+                                .requestMatchers("/springbox","/springbox/register", "/springbox/login", "/h2-console/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .formLogin(formLogin ->
                         formLogin
-                                .loginPage("/savesync/login")
-                                .defaultSuccessUrl("/savesync/files", true)
+                                .loginPage("/springbox/login")
+                                .defaultSuccessUrl("/springbox/files", true)
                                 .permitAll()
                 )
                 .logout(logout ->
                         logout
-                                .logoutSuccessUrl("/savesync/login?logout")
+                                .logoutUrl("/springbox/logout")
+                                .logoutSuccessUrl("/springbox")
+                                .invalidateHttpSession(true)
+                                .deleteCookies("JSESSIONID")
                                 .permitAll()
                 )
                 .csrf(AbstractHttpConfigurer::disable)
