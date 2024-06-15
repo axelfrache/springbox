@@ -69,7 +69,7 @@ public class FileController {
 
     @PostMapping("/springbox/upload")
     public String uploadFile(@RequestParam("file") MultipartFile file, @RequestParam(required = false) Long folderId, @AuthenticationPrincipal UserDetails userDetails) throws IOException {
-        Optional<User> optionalUser = userRepository.findByUsername(userDetails.getUsername());
+        var optionalUser = userRepository.findByUsername(userDetails.getUsername());
         if (optionalUser.isEmpty()) {
             return "error";
         }
@@ -79,7 +79,7 @@ public class FileController {
             folder = folderRepository.findById(folderId).orElse(null);
         }
         String fileName = file.getOriginalFilename();
-        String filePath = "uploads/" + fileName;
+        String filePath = STR."uploads/\{fileName}";
         try (FileOutputStream fos = new FileOutputStream(filePath)) {
             fos.write(file.getBytes());
         }
@@ -131,7 +131,7 @@ public class FileController {
                 throw new RuntimeException("Could not read the file!");
             }
         } catch (Exception e) {
-            throw new RuntimeException("Error: " + e.getMessage());
+            throw new RuntimeException(STR."Error: \{e.getMessage()}");
         }
     }
 
