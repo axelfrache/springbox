@@ -8,6 +8,26 @@
             background-color: #f0f8ff;
         }
 
+        .hero {
+            background: url('https://source.unsplash.com/1600x900/?cloud,storage') no-repeat center center;
+            background-size: cover;
+            color: white;
+            padding: 100px 0;
+        }
+
+        .hero h1 {
+            font-size: 4em;
+            font-weight: bold;
+        }
+
+        .features {
+            padding: 50px 0;
+        }
+
+        .feature {
+            margin-bottom: 30px;
+        }
+
         h1, h2, h3, h4, h5, h6 {
             color: #2c3e50;
         }
@@ -40,13 +60,11 @@
 <body>
 <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-<div class="container">
-    <div class="row mt-5">
-        <div class="col-md-12 text-center">
-            <h1>Welcome to SpringBox</h1>
-            <p class="lead">Your personal cloud storage solution</p>
-            <a href="/springbox/register" class="btn btn-primary">Get Started</a>
-        </div>
+<div class="hero text-center">
+    <div class="container">
+        <h1>Welcome to SpringBox</h1>
+        <p class="lead">Your personal cloud storage solution</p>
+        <a href="/springbox/register" class="btn btn-primary btn-lg">Get Started</a>
     </div>
 </div>
 

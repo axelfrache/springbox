@@ -52,6 +52,34 @@
         .navbar-light .navbar-nav .nav-link.active {
             color: #27ae60;
         }
+
+        .list-group-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .list-group-item i {
+            margin-right: 10px;
+        }
+
+        .icon-folder {
+            color: #f39c12;
+        }
+
+        .icon-file {
+            color: #3498db;
+        }
+
+        .btn-link {
+            text-decoration: none;
+            color: #3498db;
+        }
+
+        .btn-link:hover {
+            text-decoration: underline;
+            color: #2980b9;
+        }
     </style>
 </head>
 <body>
@@ -82,9 +110,9 @@
 
     <div class="mb-3">
         <ul class="list-group">
-            <li th:each="folder : ${folders}" class="list-group-item d-flex justify-content-between align-items-center">
+            <li th:each="folder : ${folders}" class="list-group-item">
                 <span>
-                    <i class="fas fa-folder"></i>
+                    <i class="fas fa-folder icon-folder"></i>
                     <a th:href="@{/springbox/files(folderId=${folder.id})}" th:text="${folder.name}"></a>
                 </span>
                 <span>
@@ -94,13 +122,13 @@
                     </form>
                 </span>
             </li>
-            <li th:each="file : ${files}" class="list-group-item d-flex justify-content-between align-items-center">
+            <li th:each="file : ${files}" class="list-group-item">
                 <span>
-                    <i class="fas fa-file-alt"></i>
+                    <i class="fas fa-file-alt icon-file"></i>
                     <span th:text="${file.name}"></span>
                 </span>
                 <span>
-                    <a th:href="@{/springbox/files/download/{id}(id=${file.id})}" class="btn btn-link btn-sm">Download</a>
+                    <a th:href="@{/springbox/files/download/{id}(id=${file.id})}" class="btn btn-link btn-sm"><i class="fas fa-download"></i>Download</a>
                     <form action="/springbox/file/delete" method="post" class="d-inline">
                         <input type="hidden" name="id" th:value="${file.id}">
                         <button type="submit" class="btn btn-danger btn-sm">Delete</button>
