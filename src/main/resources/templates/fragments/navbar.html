@@ -2,10 +2,31 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .navbar-custom {
+            background-color: #8D7389;
+        }
+
+        .navbar-light .navbar-brand {
+            color: #3498db;
+        }
+
+        .navbar-light .navbar-nav .nav-link {
+            color: #2c3e50;
+        }
+
+        .navbar-light .navbar-nav .nav-link:hover {
+            color: #2980b9;
+        }
+
+        .navbar-light .navbar-nav .nav-link.active {
+            color: #27ae60;
+        }
+    </style>
 </head>
 <body>
 <div th:fragment="navbar">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom" style="background-color: #385871;">
         <div class="container-fluid">
             <a class="navbar-brand" href="/springbox">SpringBox</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
