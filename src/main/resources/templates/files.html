@@ -36,7 +36,7 @@
             <li th:each="folder : ${folders}" class="list-group-item d-flex justify-content-between align-items-center">
                     <span>
                         <i class="fas fa-folder"></i> 
-                        <a th:href="@{/springbox/files?folderId={id}(id=${folder.id})}" th:text="${folder.name}"></a>
+                        <a th:href="@{/springbox/files(folderId=${folder.id})}" th:text="${folder.name}"></a>
                     </span>
                 <span>
                         <form action="/springbox/folder/delete" method="post" class="d-inline">
