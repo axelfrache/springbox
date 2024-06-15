@@ -7,6 +7,10 @@ import io.github.axelfrache.springbox.repository.FileRepository;
 import io.github.axelfrache.springbox.repository.FolderRepository;
 import io.github.axelfrache.springbox.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -16,8 +20,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Controller
@@ -105,6 +112,29 @@ public class FileController {
         return STR."redirect:/springbox/files?folderId=\{parentFolder != null ? parentFolder.getId() : ""}";
     }
 
+    @GetMapping("/springbox/files/download/{id}")
+    public ResponseEntity<Resource> downloadFile(@PathVariable Long id) {
+        Optional<File> optionalFile = fileRepository.findById(id);
+        if (optionalFile.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        File file = optionalFile.get();
+        try {
+            Path filePath = Paths.get(file.getPath());
+            Resource resource = new UrlResource(filePath.toUri());
+            if (resource.exists() || resource.isReadable()) {
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
+                        .body(resource);
+            } else {
+                throw new RuntimeException("Could not read the file!");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error: " + e.getMessage());
+        }
+    }
+
     @PostMapping("/springbox/folder/delete")
     public String deleteFolder(@RequestParam("id") Long id) {
         deleteFolderAndContents(id);
@@ -122,7 +152,7 @@ public class FileController {
         for (Folder subFolder : subFolders) {
             deleteFolderAndContents(subFolder.getId());
         }
-        List<File> files = fileRepository.findByFolderAndUser(folderRepository.findById(folderId).orElse(null), userRepository.findById(folderRepository.findById(folderId).orElse(null).getUser().getId()).orElse(null));
+        List<File> files = fileRepository.findByFolderAndUser(folderRepository.findById(folderId).orElse(null), userRepository.findById(Objects.requireNonNull(folderRepository.findById(folderId).orElse(null)).getUser().getId()).orElse(null));
         for (File file : files) {
             fileRepository.deleteById(file.getId());
         }
