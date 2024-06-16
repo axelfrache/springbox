@@ -21,25 +21,19 @@ SpringBox is a Spring-based application designed for secure and efficient file s
     cd SpringBox
     ```
 
-2. Build the project
+2. Build and run the application using Docker
 
     ```sh
-    mvn clean install
+    docker-compose up --build -d
     ```
 
-3. Run the application
-
-    ```sh
-    mvn spring-boot:run
-    ```
-
-4. Access the application
+3. Access the application
 
    Open your browser and navigate to `http://localhost:8080`
 
 ### Configuration
 
-The application uses an H2 in-memory database by default. For production use, you can configure a different database in `src/main/resources/application.properties`.
+The application uses a MySQL database as specified in the `docker-compose.yml` file. You can customize the database configuration in the `docker-compose.yml` and `application.properties` files as needed.
 
 ### Usage
 
