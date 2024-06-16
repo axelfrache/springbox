@@ -79,7 +79,7 @@ public class FileController {
             folder = folderRepository.findById(folderId).orElse(null);
         }
         String fileName = file.getOriginalFilename();
-        String filePath = STR."uploads/\{fileName}";
+        String filePath = "uploads/" + fileName;
         try (FileOutputStream fos = new FileOutputStream(filePath)) {
             fos.write(file.getBytes());
         }
@@ -90,7 +90,7 @@ public class FileController {
         dbFile.setUser(user);
         dbFile.setFolder(folder);
         fileRepository.save(dbFile);
-        return STR."redirect:/springbox/files?folderId=\{folder != null ? folder.getId() : ""}";
+        return "redirect:/springbox/files?folderId=" + (folder != null ? folder.getId() : "");
     }
 
     @PostMapping("/springbox/folder")
@@ -109,7 +109,7 @@ public class FileController {
         folder.setUser(user);
         folder.setParentFolder(parentFolder);
         folderRepository.save(folder);
-        return STR."redirect:/springbox/files?folderId=\{parentFolder != null ? parentFolder.getId() : ""}";
+        return "redirect:/springbox/files?folderId=" + (parentFolder != null ? parentFolder.getId() : "");
     }
 
     @GetMapping("/springbox/files/download/{id}")
@@ -131,7 +131,7 @@ public class FileController {
                 throw new RuntimeException("Could not read the file!");
             }
         } catch (Exception e) {
-            throw new RuntimeException(STR."Error: \{e.getMessage()}");
+            throw new RuntimeException("Error: " + e.getMessage());
         }
     }
 
