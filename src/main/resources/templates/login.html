@@ -55,10 +55,10 @@
                     <h2 class="text-center">Login</h2>
                     <form action="/springbox/login" method="post">
                         <div th:if="${param.error}" class="alert alert-danger" role="alert">
-                            Invalid username or password.
+                            Invalid email or password.
                         </div>
                         <div class="mb-3">
-                            <input type="text" id="username" name="username" class="form-control" placeholder="Username" required>
+                            <input type="email" id="email" name="email" class="form-control" placeholder="Email" required>
                         </div>
                         <div class="mb-3">
                             <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>

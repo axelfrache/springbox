@@ -29,7 +29,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/springbox","/springbox/register", "/springbox/login","/error", "/h2-console/**").permitAll()
+                                .requestMatchers("/springbox", "/springbox/register", "/springbox/login", "/error", "/h2-console/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .formLogin(formLogin ->
@@ -37,6 +37,7 @@ public class SecurityConfig {
                                 .loginPage("/springbox/login")
                                 .defaultSuccessUrl("/springbox/files", true)
                                 .permitAll()
+                                .usernameParameter("email")
                 )
                 .logout(logout ->
                         logout

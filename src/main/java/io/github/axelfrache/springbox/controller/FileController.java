@@ -56,7 +56,7 @@ public class FileController {
 
     @GetMapping("/springbox/files")
     public String listFiles(@RequestParam(required = false) Long folderId, Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        Optional<User> optionalUser = userRepository.findByUsername(userDetails.getUsername());
+        Optional<User> optionalUser = userRepository.findByEmail(userDetails.getUsername());
         if (optionalUser.isEmpty()) {
             return "error";
         }
@@ -78,13 +78,13 @@ public class FileController {
         model.addAttribute("files", files);
         model.addAttribute("folders", folders);
         model.addAttribute("currentFolder", currentFolder);
-        model.addAttribute("username", userDetails.getUsername());
+        model.addAttribute("username", user.getUsername()); // Pass the username to the view
         return "files";
     }
 
     @PostMapping("/springbox/upload")
     public String uploadFile(@RequestParam("file") MultipartFile file, @RequestParam(required = false) Long folderId, @AuthenticationPrincipal UserDetails userDetails) throws IOException {
-        var optionalUser = userRepository.findByUsername(userDetails.getUsername());
+        var optionalUser = userRepository.findByEmail(userDetails.getUsername());
         if (optionalUser.isEmpty()) {
             return "error";
         }
@@ -110,7 +110,7 @@ public class FileController {
 
     @PostMapping("/springbox/folder")
     public String createFolder(@RequestParam("name") String name, @RequestParam(required = false) Long parentFolderId, @AuthenticationPrincipal UserDetails userDetails) {
-        Optional<User> optionalUser = userRepository.findByUsername(userDetails.getUsername());
+        Optional<User> optionalUser = userRepository.findByEmail(userDetails.getUsername());
         if (optionalUser.isEmpty()) {
             return "error";
         }
