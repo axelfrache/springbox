@@ -148,6 +148,7 @@
                 </span>
                 <span>
                     <a th:href="@{/springbox/files/download/{id}(id=${file.id})}" class="btn btn-link btn-sm"><i class="fas fa-download"></i>Download</a>
+                    <a th:href="@{/springbox/files/edit/{id}(id=${file.id})}" class="btn btn-link btn-sm"><i class="fas fa-edit"></i>Edit</a>
                     <form action="/springbox/file/delete" method="post" class="d-inline">
                         <input type="hidden" name="id" th:value="${file.id}">
                         <button type="submit" class="btn btn-danger btn-sm">Delete</button>
