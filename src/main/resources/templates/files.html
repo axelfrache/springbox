@@ -95,6 +95,17 @@
             border-color: #2980b9;
             background-color: #f0f8ff;
         }
+
+        .icon-edit-disabled {
+            color: #d3d3d3;
+            cursor: not-allowed;
+            text-decoration: none;
+        }
+
+        .icon-edit-disabled:hover {
+            color: #d3d3d3;
+        }
+
     </style>
 </head>
 <body>
@@ -148,7 +159,8 @@
                 </span>
                 <span>
                     <a th:href="@{/springbox/files/download/{id}(id=${file.id})}" class="btn btn-link btn-sm"><i class="fas fa-download"></i>Download</a>
-                    <a th:href="@{/springbox/files/edit/{id}(id=${file.id})}" class="btn btn-link btn-sm"><i class="fas fa-edit"></i>Edit</a>
+                    <a th:if="${file.editable}" th:href="@{/springbox/files/edit/{id}(id=${file.id})}" class="btn btn-link btn-sm"><i class="fas fa-edit icon-edit"></i> Edit</a>
+                    <a th:if="${!file.editable}" class="btn btn-link btn-sm icon-edit-disabled"><i class="fas fa-edit"></i> Edit</a>
                     <form action="/springbox/file/delete" method="post" class="d-inline">
                         <input type="hidden" name="id" th:value="${file.id}">
                         <button type="submit" class="btn btn-danger btn-sm">Delete</button>

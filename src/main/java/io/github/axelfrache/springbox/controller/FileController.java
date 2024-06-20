@@ -79,6 +79,16 @@ public class FileController {
 			folders = folderRepository.findByUserAndParentFolderIsNull(user);
 		}
 
+		for (File file : files) {
+			try {
+				Path filePath = Paths.get(file.getPath());
+				Files.readString(filePath);
+				file.setEditable(true);
+			} catch (IOException e) {
+				file.setEditable(false);
+			}
+		}
+
 		model.addAttribute("files", files);
 		model.addAttribute("folders", folders);
 		model.addAttribute("currentFolder", currentFolder);

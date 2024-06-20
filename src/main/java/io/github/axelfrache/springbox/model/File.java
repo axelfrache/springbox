@@ -33,4 +33,7 @@ public class File {
 
 	@Transient
 	private String content;
+
+	@Transient
+	private boolean editable;
 }
