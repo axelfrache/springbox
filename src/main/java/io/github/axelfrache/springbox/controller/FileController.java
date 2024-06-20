@@ -79,6 +79,16 @@ public class FileController {
 			folders = folderRepository.findByUserAndParentFolderIsNull(user);
 		}
 
+		for (File file : files) {
+			try {
+				Path filePath = Paths.get(file.getPath());
+				Files.readString(filePath);
+				file.setEditable(true);
+			} catch (IOException e) {
+				file.setEditable(false);
+			}
+		}
+
 		model.addAttribute("files", files);
 		model.addAttribute("folders", folders);
 		model.addAttribute("currentFolder", currentFolder);
@@ -156,6 +166,36 @@ public class FileController {
 		} catch (Exception e) {
 			throw new RuntimeException("Error: " + e.getMessage());
 		}
+	}
+
+	@GetMapping("/springbox/files/edit/{id}")
+	public String editFileForm(@PathVariable Long id, Model model) throws IOException {
+		Optional<File> optionalFile = fileRepository.findById(id);
+		if (optionalFile.isEmpty()) {
+			return "error";
+		}
+
+		File file = optionalFile.get();
+		Path filePath = Paths.get(file.getPath());
+		String content = Files.readString(filePath);
+		file.setContent(content);
+
+		model.addAttribute("file", file);
+		return "edit-file";
+	}
+
+	@PostMapping("/springbox/files/edit")
+	public String editFile(@RequestParam("id") Long id, @RequestParam("content") String content) throws IOException {
+		Optional<File> optionalFile = fileRepository.findById(id);
+		if (optionalFile.isEmpty()) {
+			return "error";
+		}
+
+		File file = optionalFile.get();
+		Path filePath = Paths.get(file.getPath());
+		Files.writeString(filePath, content);
+
+		return "redirect:/springbox/files";
 	}
 
 	@PostMapping("/springbox/folder/delete")
