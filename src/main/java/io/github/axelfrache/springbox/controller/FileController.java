@@ -89,10 +89,13 @@ public class FileController {
 			}
 		}
 
+		double totalSize = calculateTotalSize(user);
+
 		model.addAttribute("files", files);
 		model.addAttribute("folders", folders);
 		model.addAttribute("currentFolder", currentFolder);
 		model.addAttribute("username", user.getUsername());
+		model.addAttribute("totalSize", totalSize);
 		return "files";
 	}
 
@@ -222,4 +225,17 @@ public class FileController {
 		}
 		folderRepository.deleteById(folderId);
 	}
+
+	private double calculateTotalSize(User user) {
+		List<File> files = fileRepository.findByUser(user);
+		long totalSizeInBytes = files.stream().mapToLong(file -> {
+			try {
+				return Files.size(Paths.get(file.getPath()));
+			} catch (IOException e) {
+				return 0;
+			}
+		}).sum();
+		return totalSizeInBytes / (1024.0 * 1024.0);
+	}
+
 }
