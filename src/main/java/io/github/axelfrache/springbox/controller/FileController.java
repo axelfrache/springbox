@@ -238,4 +238,29 @@ public class FileController {
 		return totalSizeInBytes / (1024.0 * 1024.0);
 	}
 
+	@GetMapping("/springbox/search")
+	public String searchFiles(@RequestParam("query") String query, Model model, @AuthenticationPrincipal UserDetails userDetails) {
+		Optional<User> optionalUser = userRepository.findByEmail(userDetails.getUsername());
+		if (optionalUser.isEmpty()) {
+			return "error";
+		}
+
+		User user = optionalUser.get();
+		List<File> files = fileRepository.findByUserAndNameContaining(user, query);
+
+		for (File file : files) {
+			try {
+				Path filePath = Paths.get(file.getPath());
+				Files.readString(filePath);
+				file.setEditable(true);
+			} catch (IOException e) {
+				file.setEditable(false);
+			}
+		}
+
+		model.addAttribute("files", files);
+		model.addAttribute("query", query);
+		return "search-results";
+	}
+
 }
