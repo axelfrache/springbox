@@ -5,10 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -91,12 +88,43 @@ public class FileController {
 
 		double totalSize = calculateTotalSize(user);
 
+		Map<String, Double> mediaTypePercentages = calculateMediaTypePercentages(files);
+
 		model.addAttribute("files", files);
 		model.addAttribute("folders", folders);
 		model.addAttribute("currentFolder", currentFolder);
 		model.addAttribute("username", user.getUsername());
 		model.addAttribute("totalSize", totalSize);
+		model.addAttribute("mediaTypePercentages", mediaTypePercentages);
 		return "files";
+	}
+
+	private Map<String, Double> calculateMediaTypePercentages(List<File> files) {
+		Map<String, Long> mediaTypeCounts = new HashMap<>();
+		long totalFiles = files.size();
+
+		for (File file : files) {
+			String mediaType = determineMediaType(file.getName()).toLowerCase(); // Transformation en minuscules ici
+			mediaTypeCounts.put(mediaType, mediaTypeCounts.getOrDefault(mediaType, 0L) + 1);
+		}
+
+		Map<String, Double> mediaTypePercentages = new HashMap<>();
+		for (Map.Entry<String, Long> entry : mediaTypeCounts.entrySet()) {
+			mediaTypePercentages.put(entry.getKey(), (entry.getValue() * 100.0) / totalFiles);
+		}
+
+		return mediaTypePercentages;
+	}
+
+	private String determineMediaType(String fileName) {
+		String extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
+        return switch (extension) {
+            case "jpg", "jpeg", "png", "gif" -> "Images";
+            case "mp4", "avi", "mov" -> "Videos";
+            case "mp3", "wav" -> "Audio";
+            case "pdf", "doc", "docx" -> "Documents";
+            default -> "Others";
+        };
 	}
 
 	@PostMapping("/springbox/upload")

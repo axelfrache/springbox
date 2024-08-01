@@ -1,7 +1,9 @@
+/* Général */
 body {
     background-color: #f0f8ff;
 }
 
+/* Typographie */
 h1, h2, h3, h4, h5, h6 {
     color: #2c3e50;
 }
@@ -10,6 +12,7 @@ h1, h2, h3, h4, h5, h6 {
     color: #34495e;
 }
 
+/* Boutons */
 .btn-primary {
     background-color: #3498db;
     border-color: #3498db;
@@ -30,6 +33,37 @@ h1, h2, h3, h4, h5, h6 {
     border-color: #229954;
 }
 
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+.btn-link {
+    text-decoration: none;
+    color: #3498db;
+}
+
+.btn-link:hover {
+    text-decoration: underline;
+    color: #2980b9;
+}
+
+.icon-edit-disabled {
+    color: #d3d3d3;
+    cursor: not-allowed;
+    text-decoration: none;
+}
+
+.icon-edit-disabled:hover {
+    color: #d3d3d3;
+}
+
+/* Barre de navigation */
 .navbar-light .navbar-brand {
     color: #3498db;
 }
@@ -46,6 +80,7 @@ h1, h2, h3, h4, h5, h6 {
     color: #27ae60;
 }
 
+/* Listes */
 .list-group-item {
     display: flex;
     align-items: center;
@@ -64,16 +99,7 @@ h1, h2, h3, h4, h5, h6 {
     color: #3498db;
 }
 
-.btn-link {
-    text-decoration: none;
-    color: #3498db;
-}
-
-.btn-link:hover {
-    text-decoration: underline;
-    color: #2980b9;
-}
-
+/* Dropzone */
 .dropzone {
     border: 2px dashed #3498db;
     border-radius: 5px;
@@ -89,12 +115,70 @@ h1, h2, h3, h4, h5, h6 {
     background-color: #f0f8ff;
 }
 
-.icon-edit-disabled {
-    color: #d3d3d3;
-    cursor: not-allowed;
-    text-decoration: none;
+/* Progress bar */
+.progress-bar {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
 }
 
-.icon-edit-disabled:hover {
-    color: #d3d3d3;
+.progress-bar-images {
+    background-color: #3498db;
+}
+
+.progress-bar-videos {
+    background-color: #e74c3c;
+}
+
+.progress-bar-audio {
+    background-color: #2ecc71;
+}
+
+.progress-bar-documents {
+    background-color: #f1c40f;
+}
+
+.progress-bar-others {
+    background-color: #7f8c8d;
+}
+
+/* Sections spécifiques */
+.hero {
+    background: url('https://source.unsplash.com/1600x900/?cloud,storage') no-repeat center center;
+    background-size: cover;
+    color: white;
+    padding: 100px 0;
+}
+
+.hero h1 {
+    font-size: 4em;
+    font-weight: bold;
+}
+
+.features {
+    padding: 50px 0;
+}
+
+.feature {
+    margin-bottom: 30px;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+.form-container {
+    max-width: 800px;
+    margin-top: 50px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
