@@ -1,7 +1,5 @@
 package io.github.axelfrache.springbox.controller;
 
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -56,7 +54,7 @@ public class UserController {
 
 	@GetMapping("/user/edit")
 	public String showEditUserForm(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-		Optional<User> optionalUser = userRepository.findByEmail(userDetails.getUsername());
+		var optionalUser = userRepository.findByEmail(userDetails.getUsername());
 		if (optionalUser.isEmpty()) {
 			return "error";
 		}
@@ -69,11 +67,11 @@ public class UserController {
 			@RequestParam("email") String email,
 			@RequestParam("password") String password,
 			@AuthenticationPrincipal UserDetails userDetails) {
-		Optional<User> optionalUser = userRepository.findByEmail(userDetails.getUsername());
+		var optionalUser = userRepository.findByEmail(userDetails.getUsername());
 		if (optionalUser.isEmpty()) {
 			return "error";
 		}
-		User user = optionalUser.get();
+		var user = optionalUser.get();
 		user.setUsername(username);
 		user.setEmail(email);
 		if (!password.isBlank()) {
@@ -81,7 +79,7 @@ public class UserController {
 		}
 		userRepository.save(user);
 
-		UserDetails updatedUserDetails = userDetailsService.loadUserByUsername(user.getEmail());
+		var updatedUserDetails = userDetailsService.loadUserByUsername(user.getEmail());
 		SecurityContextHolder.getContext().setAuthentication(
 				new UsernamePasswordAuthenticationToken(updatedUserDetails, updatedUserDetails.getPassword(), updatedUserDetails.getAuthorities())
 		);

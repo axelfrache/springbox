@@ -62,7 +62,7 @@ public class FileController {
 			return "error";
 		}
 
-		User user = optionalUser.get();
+		var user = optionalUser.get();
 		Folder currentFolder = null;
 		List<File> files;
 		List<Folder> folders;
@@ -78,7 +78,7 @@ public class FileController {
 
 		for (File file : files) {
 			try {
-				Path filePath = Paths.get(file.getPath());
+				var filePath = Paths.get(file.getPath());
 				Files.readString(filePath);
 				file.setEditable(true);
 			} catch (IOException e) {
@@ -86,7 +86,7 @@ public class FileController {
 			}
 		}
 
-		double totalSize = calculateTotalSize(user);
+		var totalSize = calculateTotalSize(user);
 
 		Map<String, Double> mediaTypePercentages = calculateMediaTypePercentages(files);
 
@@ -101,10 +101,10 @@ public class FileController {
 
 	private Map<String, Double> calculateMediaTypePercentages(List<File> files) {
 		Map<String, Long> mediaTypeCounts = new HashMap<>();
-		long totalFiles = files.size();
+		var totalFiles = files.size();
 
 		for (File file : files) {
-			String mediaType = determineMediaType(file.getName()).toLowerCase(); // Transformation en minuscules ici
+			String mediaType = determineMediaType(file.getName()).toLowerCase();
 			mediaTypeCounts.put(mediaType, mediaTypeCounts.getOrDefault(mediaType, 0L) + 1);
 		}
 
@@ -117,7 +117,7 @@ public class FileController {
 	}
 
 	private String determineMediaType(String fileName) {
-		String extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
+		var extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
         return switch (extension) {
             case "jpg", "jpeg", "png", "gif" -> "Images";
             case "mp4", "avi", "mov" -> "Videos";
@@ -134,18 +134,18 @@ public class FileController {
 		if (optionalUser.isEmpty()) {
 			return "error";
 		}
-		User user = optionalUser.get();
+		var user = optionalUser.get();
 		Folder folder = null;
 		if (folderId != null) {
 			folder = folderRepository.findById(folderId).orElse(null);
 		}
 		for (MultipartFile file : files) {
-			String fileName = file.getOriginalFilename();
-			String filePath = "uploads/" + fileName;
+			var fileName = file.getOriginalFilename();
+			var filePath = "uploads/" + fileName;
 			try (FileOutputStream fos = new FileOutputStream(filePath)) {
 				fos.write(file.getBytes());
 			}
-			File dbFile = new File();
+			var dbFile = new File();
 			dbFile.setName(fileName);
 			dbFile.setPath(filePath);
 			dbFile.setUploadDate(new Date());
@@ -163,7 +163,7 @@ public class FileController {
 		if (optionalUser.isEmpty()) {
 			return "error";
 		}
-		User user = optionalUser.get();
+		var user = optionalUser.get();
 		Folder parentFolder = null;
 		if (parentFolderId != null) {
 			parentFolder = folderRepository.findById(parentFolderId).orElse(null);
@@ -178,15 +178,14 @@ public class FileController {
 
 	@GetMapping("/springbox/files/download/{id}")
 	public ResponseEntity<Resource> downloadFile(@PathVariable Long id) {
-		Optional<File> optionalFile = fileRepository.findById(id);
+		var optionalFile = fileRepository.findById(id);
 		if (optionalFile.isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}
 
-		File file = optionalFile.get();
+		var file = optionalFile.get();
 		try {
-			Path filePath = Paths.get(file.getPath());
-			Resource resource = new UrlResource(filePath.toUri());
+			var resource = new UrlResource(Paths.get(file.getPath()).toUri());
 			if (resource.exists() || resource.isReadable()) {
 				return ResponseEntity.ok()
 						.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
@@ -201,14 +200,13 @@ public class FileController {
 
 	@GetMapping("/springbox/files/edit/{id}")
 	public String editFileForm(@PathVariable Long id, Model model) throws IOException {
-		Optional<File> optionalFile = fileRepository.findById(id);
+		var optionalFile = fileRepository.findById(id);
 		if (optionalFile.isEmpty()) {
 			return "error";
 		}
 
-		File file = optionalFile.get();
-		Path filePath = Paths.get(file.getPath());
-		String content = Files.readString(filePath);
+		var file = optionalFile.get();
+		var content = Files.readString(Paths.get(file.getPath()));
 		file.setContent(content);
 
 		model.addAttribute("file", file);
@@ -217,15 +215,11 @@ public class FileController {
 
 	@PostMapping("/springbox/files/edit")
 	public String editFile(@RequestParam("id") Long id, @RequestParam("content") String content) throws IOException {
-		Optional<File> optionalFile = fileRepository.findById(id);
+		var optionalFile = fileRepository.findById(id);
 		if (optionalFile.isEmpty()) {
 			return "error";
 		}
-
-		File file = optionalFile.get();
-		Path filePath = Paths.get(file.getPath());
-		Files.writeString(filePath, content);
-
+		Files.writeString(Paths.get(optionalFile.get().getPath()), content);
 		return "redirect:/springbox/files";
 	}
 
@@ -242,11 +236,11 @@ public class FileController {
 	}
 
 	private void deleteFolderAndContents(Long folderId) {
-		List<Folder> subFolders = folderRepository.findByParentFolder(folderRepository.findById(folderId).orElse(null));
-		for (Folder subFolder : subFolders) {
+		var subFolders = folderRepository.findByParentFolder(folderRepository.findById(folderId).orElse(null));
+		for (var subFolder : subFolders) {
 			deleteFolderAndContents(subFolder.getId());
 		}
-		List<File> files = fileRepository.findByFolderAndUser(folderRepository.findById(folderId).orElse(null),
+		var files = fileRepository.findByFolderAndUser(folderRepository.findById(folderId).orElse(null),
 				userRepository.findById(Objects.requireNonNull(folderRepository.findById(folderId).orElse(null)).getUser().getId()).orElse(null));
 		for (File file : files) {
 			fileRepository.deleteById(file.getId());
@@ -255,8 +249,8 @@ public class FileController {
 	}
 
 	private double calculateTotalSize(User user) {
-		List<File> files = fileRepository.findByUser(user);
-		long totalSizeInBytes = files.stream().mapToLong(file -> {
+		var files = fileRepository.findByUser(user);
+		var totalSizeInBytes = files.stream().mapToLong(file -> {
 			try {
 				return Files.size(Paths.get(file.getPath()));
 			} catch (IOException e) {
@@ -268,27 +262,22 @@ public class FileController {
 
 	@GetMapping("/springbox/search")
 	public String searchFiles(@RequestParam("query") String query, Model model, @AuthenticationPrincipal UserDetails userDetails) {
-		Optional<User> optionalUser = userRepository.findByEmail(userDetails.getUsername());
+		var optionalUser = userRepository.findByEmail(userDetails.getUsername());
 		if (optionalUser.isEmpty()) {
 			return "error";
 		}
-
-		User user = optionalUser.get();
-		List<File> files = fileRepository.findByUserAndNameContaining(user, query);
-
-		for (File file : files) {
+		var user = optionalUser.get();
+		var files = fileRepository.findByUserAndNameContaining(user, query);
+		for (var file : files) {
 			try {
-				Path filePath = Paths.get(file.getPath());
-				Files.readString(filePath);
+				Files.readString(Paths.get(file.getPath()));
 				file.setEditable(true);
 			} catch (IOException e) {
 				file.setEditable(false);
 			}
 		}
-
 		model.addAttribute("files", files);
 		model.addAttribute("query", query);
 		return "search-results";
 	}
-
 }
