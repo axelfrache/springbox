@@ -25,9 +25,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import io.github.axelfrache.springbox.model.Audio;
+import io.github.axelfrache.springbox.model.Document;
 import io.github.axelfrache.springbox.model.File;
 import io.github.axelfrache.springbox.model.Folder;
+import io.github.axelfrache.springbox.model.Image;
+import io.github.axelfrache.springbox.model.Other;
 import io.github.axelfrache.springbox.model.User;
+import io.github.axelfrache.springbox.model.Video;
 import io.github.axelfrache.springbox.repository.FileRepository;
 import io.github.axelfrache.springbox.repository.FolderRepository;
 import io.github.axelfrache.springbox.repository.UserRepository;
@@ -70,15 +75,18 @@ public class FileController {
 		var currentFolder = folderId != null ? folderRepository.findById(folderId).orElse(null) : null;
 		var files = folderId != null ? fileRepository.findByFolderAndUser(currentFolder, user) : fileRepository.findByUserAndFolderIsNull(user);
 		var folders = folderId != null ? folderRepository.findByParentFolder(currentFolder) : folderRepository.findByUserAndParentFolderIsNull(user);
+		var favoriteFiles = fileRepository.findByUserAndFavoriteTrue(user);
+		var userFiles = fileRepository.findByUser(user);
 
 		files.forEach(file -> file.setEditable(isFileEditable(file.getPath())));
 
 		model.addAttribute("files", files);
 		model.addAttribute("folders", folders);
 		model.addAttribute("currentFolder", currentFolder);
+		model.addAttribute("favoriteFiles", favoriteFiles);
 		model.addAttribute("username", user.getUsername());
 		model.addAttribute("totalSize", calculateTotalSize(user));
-		model.addAttribute("mediaTypePercentages", calculateMediaTypePercentages(files));
+		model.addAttribute("mediaTypePercentages", calculateMediaTypePercentages(userFiles));
 		return "files";
 	}
 
@@ -96,7 +104,7 @@ public class FileController {
 		var totalFiles = files.size();
 
 		files.forEach(file -> {
-			var mediaType = determineMediaType(file.getName()).toLowerCase();
+			var mediaType = determineMediaType(file).toLowerCase();
 			mediaTypeCounts.put(mediaType, mediaTypeCounts.getOrDefault(mediaType, 0L) + 1);
 		});
 
@@ -106,15 +114,12 @@ public class FileController {
 		return mediaTypePercentages;
 	}
 
-	private String determineMediaType(String fileName) {
-		var extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
-		return switch (extension) {
-			case "jpg", "jpeg", "png", "gif" -> "Images";
-			case "mp4", "avi", "mov" -> "Videos";
-			case "mp3", "wav" -> "Audio";
-			case "pdf", "doc", "docx" -> "Documents";
-			default -> "Others";
-		};
+	private String determineMediaType(File file) {
+		if (file instanceof Document) return "Documents";
+		if (file instanceof Audio) return "Audio";
+		if (file instanceof Video) return "Videos";
+		if (file instanceof Image) return "Images";
+		return "Others";
 	}
 
 	@PostMapping("/springbox/upload")
@@ -142,7 +147,17 @@ public class FileController {
 		try (FileOutputStream fos = new FileOutputStream(filePath)) {
 			fos.write(multipartFile.getBytes());
 		}
-		var file = new File();
+
+		File file;
+		var extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
+		switch (extension) {
+		case "jpg", "jpeg", "png", "gif" -> file = new Image();
+		case "mp4", "avi", "mov" -> file = new Video();
+		case "mp3", "wav" -> file = new Audio();
+		case "pdf", "doc", "docx" -> file = new Document();
+		default -> file = new Other();
+		}
+
 		file.setName(fileName);
 		file.setPath(filePath);
 		file.setUploadDate(new Date());
@@ -224,6 +239,20 @@ public class FileController {
 	@PostMapping("/springbox/file/delete")
 	public String deleteFile(@RequestParam("id") Long id) {
 		fileRepository.deleteById(id);
+		return "redirect:/springbox/files";
+	}
+
+	@PostMapping("/springbox/file/favorite")
+	public String favoriteFile(@RequestParam("id") Long id) {
+		var optionalFile = fileRepository.findById(id);
+		if (optionalFile.isEmpty()) {
+			return "error";
+		}
+
+		var file = optionalFile.get();
+		file.setFavorite(!file.isFavorite());
+		fileRepository.save(file);
+
 		return "redirect:/springbox/files";
 	}
 

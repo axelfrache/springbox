@@ -1,6 +1,5 @@
 package io.github.axelfrache.springbox.config;
 
-import io.github.axelfrache.springbox.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +11,8 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+
+import io.github.axelfrache.springbox.service.UserDetailsServiceImpl;
 
 @Configuration
 @EnableWebSecurity
@@ -27,25 +28,22 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests(authorizeRequests ->
-                        authorizeRequests
-                                .requestMatchers("/", "/springbox/register", "/springbox/login", "/error", "/h2-console/**", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
-                                .anyRequest().authenticated()
+                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+                        .requestMatchers("/", "/springbox/register", "/springbox/login", "/error", "/h2-console/**", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
+                        .anyRequest().authenticated()
                 )
-                .formLogin(formLogin ->
-                        formLogin
-                                .loginPage("/springbox/login")
-                                .defaultSuccessUrl("/springbox/files", true)
-                                .permitAll()
-                                .usernameParameter("email")
+                .formLogin(formLogin -> formLogin
+                        .loginPage("/springbox/login")
+                        .defaultSuccessUrl("/springbox/files", true)
+                        .permitAll()
+                        .usernameParameter("email")
                 )
-                .logout(logout ->
-                        logout
-                                .logoutUrl("/springbox/logout")
-                                .logoutSuccessUrl("/springbox")
-                                .invalidateHttpSession(true)
-                                .deleteCookies("JSESSIONID")
-                                .permitAll()
+                .logout(logout -> logout
+                        .logoutUrl("/springbox/logout")
+                        .logoutSuccessUrl("/springbox")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .permitAll()
                 )
                 .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
