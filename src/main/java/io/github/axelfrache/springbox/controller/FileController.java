@@ -5,7 +5,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -57,7 +61,7 @@ public class FileController {
 
 	@GetMapping("/springbox/files")
 	public String listFiles(@RequestParam(required = false) Long folderId, Model model, @AuthenticationPrincipal UserDetails userDetails) {
-		Optional<User> optionalUser = userRepository.findByEmail(userDetails.getUsername());
+		var optionalUser = userRepository.findByEmail(userDetails.getUsername());
 		if (optionalUser.isEmpty()) {
 			return "error";
 		}
@@ -76,7 +80,7 @@ public class FileController {
 			folders = folderRepository.findByUserAndParentFolderIsNull(user);
 		}
 
-		for (File file : files) {
+		for (var file : files) {
 			try {
 				var filePath = Paths.get(file.getPath());
 				Files.readString(filePath);
@@ -103,13 +107,13 @@ public class FileController {
 		Map<String, Long> mediaTypeCounts = new HashMap<>();
 		var totalFiles = files.size();
 
-		for (File file : files) {
+		for (var file : files) {
 			String mediaType = determineMediaType(file.getName()).toLowerCase();
 			mediaTypeCounts.put(mediaType, mediaTypeCounts.getOrDefault(mediaType, 0L) + 1);
 		}
 
 		Map<String, Double> mediaTypePercentages = new HashMap<>();
-		for (Map.Entry<String, Long> entry : mediaTypeCounts.entrySet()) {
+		for (var entry : mediaTypeCounts.entrySet()) {
 			mediaTypePercentages.put(entry.getKey(), (entry.getValue() * 100.0) / totalFiles);
 		}
 
@@ -118,13 +122,13 @@ public class FileController {
 
 	private String determineMediaType(String fileName) {
 		var extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
-        return switch (extension) {
-            case "jpg", "jpeg", "png", "gif" -> "Images";
-            case "mp4", "avi", "mov" -> "Videos";
-            case "mp3", "wav" -> "Audio";
-            case "pdf", "doc", "docx" -> "Documents";
-            default -> "Others";
-        };
+		return switch (extension) {
+			case "jpg", "jpeg", "png", "gif" -> "Images";
+			case "mp4", "avi", "mov" -> "Videos";
+			case "mp3", "wav" -> "Audio";
+			case "pdf", "doc", "docx" -> "Documents";
+			default -> "Others";
+		};
 	}
 
 	@PostMapping("/springbox/upload")
@@ -139,7 +143,7 @@ public class FileController {
 		if (folderId != null) {
 			folder = folderRepository.findById(folderId).orElse(null);
 		}
-		for (MultipartFile file : files) {
+		for (var file : files) {
 			var fileName = file.getOriginalFilename();
 			var filePath = "uploads/" + fileName;
 			try (FileOutputStream fos = new FileOutputStream(filePath)) {
@@ -159,7 +163,7 @@ public class FileController {
 	@PostMapping("/springbox/folder")
 	public String createFolder(@RequestParam("name") String name, @RequestParam(required = false) Long parentFolderId,
 			@AuthenticationPrincipal UserDetails userDetails) {
-		Optional<User> optionalUser = userRepository.findByEmail(userDetails.getUsername());
+		var optionalUser = userRepository.findByEmail(userDetails.getUsername());
 		if (optionalUser.isEmpty()) {
 			return "error";
 		}
@@ -242,7 +246,7 @@ public class FileController {
 		}
 		var files = fileRepository.findByFolderAndUser(folderRepository.findById(folderId).orElse(null),
 				userRepository.findById(Objects.requireNonNull(folderRepository.findById(folderId).orElse(null)).getUser().getId()).orElse(null));
-		for (File file : files) {
+		for (var file : files) {
 			fileRepository.deleteById(file.getId());
 		}
 		folderRepository.deleteById(folderId);
