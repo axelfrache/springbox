@@ -22,14 +22,16 @@ import io.github.axelfrache.springbox.repository.UserRepository;
 @RequestMapping("/springbox")
 public class UserController {
 
-	@Autowired
-	private UserRepository userRepository;
+	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
+	private final UserDetailsService userDetailsService;
 
 	@Autowired
-	private PasswordEncoder passwordEncoder;
-
-	@Autowired
-	private UserDetailsService userDetailsService;
+	public UserController(UserRepository userRepository, PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) {
+		this.userRepository = userRepository;
+		this.passwordEncoder = passwordEncoder;
+		this.userDetailsService = userDetailsService;
+	}
 
 	@GetMapping("/register")
 	public String showRegistrationForm() {
@@ -37,7 +39,7 @@ public class UserController {
 	}
 
 	@PostMapping("/register")
-	public String registerUser(User user, Model model) {
+	public String registerUser(User user) {
 		if (userRepository.findByEmail(user.getEmail()).isPresent()) {
 			throw new UserAlreadyExistsException();
 		}

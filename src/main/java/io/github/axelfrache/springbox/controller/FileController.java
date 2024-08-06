@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -37,16 +36,17 @@ import jakarta.annotation.PostConstruct;
 @Controller
 public class FileController {
 
-	@Autowired
-	private FileRepository fileRepository;
-
-	@Autowired
-	private FolderRepository folderRepository;
-
-	@Autowired
-	private UserRepository userRepository;
-
+	private final FileRepository fileRepository;
+	private final FolderRepository folderRepository;
+	private final UserRepository userRepository;
 	private final Path uploadDirectory = Paths.get("uploads");
+
+	@Autowired
+	public FileController(FileRepository fileRepository, FolderRepository folderRepository, UserRepository userRepository) {
+		this.fileRepository = fileRepository;
+		this.folderRepository = folderRepository;
+		this.userRepository = userRepository;
+	}
 
 	@PostConstruct
 	public void init() {
@@ -67,55 +67,41 @@ public class FileController {
 		}
 
 		var user = optionalUser.get();
-		Folder currentFolder = null;
-		List<File> files;
-		List<Folder> folders;
+		var currentFolder = folderId != null ? folderRepository.findById(folderId).orElse(null) : null;
+		var files = folderId != null ? fileRepository.findByFolderAndUser(currentFolder, user) : fileRepository.findByUserAndFolderIsNull(user);
+		var folders = folderId != null ? folderRepository.findByParentFolder(currentFolder) : folderRepository.findByUserAndParentFolderIsNull(user);
 
-		if (folderId != null) {
-			currentFolder = folderRepository.findById(folderId).orElse(null);
-			files = fileRepository.findByFolderAndUser(currentFolder, user);
-			folders = folderRepository.findByParentFolder(currentFolder);
-		} else {
-			files = fileRepository.findByUserAndFolderIsNull(user);
-			folders = folderRepository.findByUserAndParentFolderIsNull(user);
-		}
-
-		for (var file : files) {
-			try {
-				var filePath = Paths.get(file.getPath());
-				Files.readString(filePath);
-				file.setEditable(true);
-			} catch (IOException e) {
-				file.setEditable(false);
-			}
-		}
-
-		var totalSize = calculateTotalSize(user);
-
-		Map<String, Double> mediaTypePercentages = calculateMediaTypePercentages(files);
+		files.forEach(file -> file.setEditable(isFileEditable(file.getPath())));
 
 		model.addAttribute("files", files);
 		model.addAttribute("folders", folders);
 		model.addAttribute("currentFolder", currentFolder);
 		model.addAttribute("username", user.getUsername());
-		model.addAttribute("totalSize", totalSize);
-		model.addAttribute("mediaTypePercentages", mediaTypePercentages);
+		model.addAttribute("totalSize", calculateTotalSize(user));
+		model.addAttribute("mediaTypePercentages", calculateMediaTypePercentages(files));
 		return "files";
+	}
+
+	private boolean isFileEditable(String filePath) {
+		try {
+			Files.readString(Paths.get(filePath));
+			return true;
+		} catch (IOException e) {
+			return false;
+		}
 	}
 
 	private Map<String, Double> calculateMediaTypePercentages(List<File> files) {
 		Map<String, Long> mediaTypeCounts = new HashMap<>();
 		var totalFiles = files.size();
 
-		for (var file : files) {
-			String mediaType = determineMediaType(file.getName()).toLowerCase();
+		files.forEach(file -> {
+			var mediaType = determineMediaType(file.getName()).toLowerCase();
 			mediaTypeCounts.put(mediaType, mediaTypeCounts.getOrDefault(mediaType, 0L) + 1);
-		}
+		});
 
 		Map<String, Double> mediaTypePercentages = new HashMap<>();
-		for (var entry : mediaTypeCounts.entrySet()) {
-			mediaTypePercentages.put(entry.getKey(), (entry.getValue() * 100.0) / totalFiles);
-		}
+		mediaTypeCounts.forEach((key, value) -> mediaTypePercentages.put(key, (value * 100.0) / totalFiles));
 
 		return mediaTypePercentages;
 	}
@@ -139,25 +125,30 @@ public class FileController {
 			return "error";
 		}
 		var user = optionalUser.get();
-		Folder folder = null;
-		if (folderId != null) {
-			folder = folderRepository.findById(folderId).orElse(null);
-		}
+		var folder = folderId != null ? folderRepository.findById(folderId).orElse(null) : null;
+
 		for (var file : files) {
-			var fileName = file.getOriginalFilename();
-			var filePath = "uploads/" + fileName;
-			try (FileOutputStream fos = new FileOutputStream(filePath)) {
-				fos.write(file.getBytes());
-			}
-			var dbFile = new File();
-			dbFile.setName(fileName);
-			dbFile.setPath(filePath);
-			dbFile.setUploadDate(new Date());
-			dbFile.setUser(user);
-			dbFile.setFolder(folder);
-			fileRepository.save(dbFile);
+			saveFile(file, user, folder);
 		}
 		return "redirect:/springbox/files?folderId=" + (folder != null ? folder.getId() : "");
+	}
+
+	private void saveFile(MultipartFile multipartFile, User user, Folder folder) throws IOException {
+		var fileName = multipartFile.getOriginalFilename();
+		if (fileName == null) {
+			throw new IllegalArgumentException("File name cannot be null");
+		}
+		var filePath = uploadDirectory.resolve(fileName).toString();
+		try (FileOutputStream fos = new FileOutputStream(filePath)) {
+			fos.write(multipartFile.getBytes());
+		}
+		var file = new File();
+		file.setName(fileName);
+		file.setPath(filePath);
+		file.setUploadDate(new Date());
+		file.setUser(user);
+		file.setFolder(folder);
+		fileRepository.save(file);
 	}
 
 	@PostMapping("/springbox/folder")
@@ -168,11 +159,8 @@ public class FileController {
 			return "error";
 		}
 		var user = optionalUser.get();
-		Folder parentFolder = null;
-		if (parentFolderId != null) {
-			parentFolder = folderRepository.findById(parentFolderId).orElse(null);
-		}
-		Folder folder = new Folder();
+		var parentFolder = parentFolderId != null ? folderRepository.findById(parentFolderId).orElse(null) : null;
+		var folder = new Folder();
 		folder.setName(name);
 		folder.setUser(user);
 		folder.setParentFolder(parentFolder);
@@ -187,7 +175,7 @@ public class FileController {
 			return ResponseEntity.notFound().build();
 		}
 
-		var file = optionalFile.get();
+		File file = optionalFile.get();
 		try {
 			var resource = new UrlResource(Paths.get(file.getPath()).toUri());
 			if (resource.exists() || resource.isReadable()) {
@@ -240,21 +228,24 @@ public class FileController {
 	}
 
 	private void deleteFolderAndContents(Long folderId) {
-		var subFolders = folderRepository.findByParentFolder(folderRepository.findById(folderId).orElse(null));
-		for (var subFolder : subFolders) {
-			deleteFolderAndContents(subFolder.getId());
+		var folderOptional = folderRepository.findById(folderId);
+		if (folderOptional.isEmpty()) {
+			return;
 		}
-		var files = fileRepository.findByFolderAndUser(folderRepository.findById(folderId).orElse(null),
-				userRepository.findById(Objects.requireNonNull(folderRepository.findById(folderId).orElse(null)).getUser().getId()).orElse(null));
-		for (var file : files) {
-			fileRepository.deleteById(file.getId());
-		}
+		var folder = folderOptional.get();
+		var subFolders = folderRepository.findByParentFolder(folder);
+		subFolders.forEach(subFolder -> deleteFolderAndContents(subFolder.getId()));
+
+		var user = folder.getUser();
+		var files = fileRepository.findByFolderAndUser(folder, user);
+		files.forEach(file -> fileRepository.deleteById(file.getId()));
+
 		folderRepository.deleteById(folderId);
 	}
 
 	private double calculateTotalSize(User user) {
 		var files = fileRepository.findByUser(user);
-		var totalSizeInBytes = files.stream().mapToLong(file -> {
+		long totalSizeInBytes = files.stream().mapToLong(file -> {
 			try {
 				return Files.size(Paths.get(file.getPath()));
 			} catch (IOException e) {
@@ -272,14 +263,8 @@ public class FileController {
 		}
 		var user = optionalUser.get();
 		var files = fileRepository.findByUserAndNameContaining(user, query);
-		for (var file : files) {
-			try {
-				Files.readString(Paths.get(file.getPath()));
-				file.setEditable(true);
-			} catch (IOException e) {
-				file.setEditable(false);
-			}
-		}
+		files.forEach(file -> file.setEditable(isFileEditable(file.getPath())));
+
 		model.addAttribute("files", files);
 		model.addAttribute("query", query);
 		return "search-results";

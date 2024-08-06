@@ -12,8 +12,12 @@ import io.github.axelfrache.springbox.repository.UserRepository;
 @Controller
 public class HomeController {
 
+    private final UserRepository userRepository;
+
     @Autowired
-    private UserRepository userRepository;
+    public HomeController(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @GetMapping("/")
     public String redirectToHome() {
@@ -24,10 +28,7 @@ public class HomeController {
     public String home(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails != null) {
             var optionalUser = userRepository.findByEmail(userDetails.getUsername());
-            if (optionalUser.isPresent()) {
-                var user = optionalUser.get();
-                model.addAttribute("username", user.getUsername());
-            }
+            optionalUser.ifPresent(user -> model.addAttribute("username", user.getUsername()));
         }
         return "home";
     }
