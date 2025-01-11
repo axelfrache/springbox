@@ -2,7 +2,9 @@
 
 SpringBox is a Spring-based application designed for secure and efficient file synchronization and backup. This project aims to provide a user-friendly interface for managing personal cloud storage solutions, leveraging the power of Spring Boot and modern web technologies.
 
-![SpringBox Preview](springbox-preview-01.png)
+<a href="https://github.com/axelfrache/springbox/blob/master/docs/assets/images/springbox-preview-01.png?raw=true">
+    <img src="docs/assets/images/springbox-preview-01.png" alt="SpringBox Preview" width="650">
+</a>
 
 ## Features
 
